@@ -1,0 +1,136 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>FluentMigrator.Extensions.Postgres</name>
+    </assembly>
+    <members>
+        <member name="T:FluentMigrator.PostgresGenerationType">
+            <summary>
+            Default value generation strategy (Identity) types. The clauses ALWAYS and BY DEFAULT determine how the sequence value is given precedence over a user-specified value in an INSERT statement.
+            </summary>
+        </member>
+        <member name="F:FluentMigrator.PostgresGenerationType.Always">
+            <summary>
+            A user-specified value is only accepted if the INSERT statement specifies OVERRIDING SYSTEM VALUE.
+            </summary>
+        </member>
+        <member name="F:FluentMigrator.PostgresGenerationType.ByDefault">
+            <summary>
+            The user-specified value takes precedence.
+            </summary>
+        </member>
+        <member name="T:FluentMigrator.PostgresIdentityModificationType">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:FluentMigrator.PostgresIdentityModificationType.Add">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:FluentMigrator.PostgresIdentityModificationType.Set">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:FluentMigrator.PostgresIdentityModificationType.Drop">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:FluentMigrator.PostgresIdentityModificationType.DropIfExists">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:FluentMigrator.Postgres.PostgresExtensions">
+             <summary>
+             Feature extensions for PostgreSQL
+             </summary>
+             <remarks> Given:
+             MigrationBase m = null;
+            
+             These are valid calls:
+             m.Alter.Column("").OnTable("").AsInt16().AddIdentity(PostgresGenerationType.Always);
+             m.Alter.Column("").OnTable("").AsInt16().SetIdentity(PostgresGenerationType.Always);
+             m.Alter.Column("").OnTable("").AsInt16().DropIdentity(true);
+             m.Alter.Column("").OnTable("").AsInt16().Identity();
+             m.Alter.Column("").OnTable("").AsInt16().Identity(PostgresGenerationType.Always);  //Ideally would like to stop this, forcing use of AddIdentity instead, but can't
+             m.Alter.Table("").AddColumn("").AsInt16().Identity(PostgresGenerationType.Always);
+             m.Alter.Table("").AlterColumn("").AsInt16().Identity(PostgresGenerationType.Always);
+             
+             These are not possible:
+             m.Alter.Table("").AddColumn("").AsInt16().AddIdentity(PostgresGenerationType.Always);
+             m.Alter.Table("").AddColumn("").AsInt16().SetIdentity(PostgresGenerationType.Always);
+             m.Alter.Table("").AddColumn("").AsInt16().DropIdentity(PostgresGenerationType.Always);
+             m.Alter.Table("").AlterColumn("").AsInt16().AddIdentity(PostgresGenerationType.Always);  //Ideally would like to have these 3, but can't distinguish between return type AddColumn and AlterColumn at compiletime
+             m.Alter.Table("").AlterColumn("").AsInt16().SetIdentity(PostgresGenerationType.Always);
+             m.Alter.Table("").AlterColumn("").AsInt16().DropIdentity(false);
+             </remarks>
+        </member>
+        <member name="P:FluentMigrator.Postgres.PostgresExtensions.IdentityGeneration">
+            <summary>
+            Column identity generation ability for PostgreSQL 10 and above
+            </summary>
+        </member>
+        <member name="P:FluentMigrator.Postgres.PostgresExtensions.IdentityModificationType">
+            <summary>
+            Column identity modification type for PostgreSQL 10 and above
+            </summary>
+        </member>
+        <member name="M:FluentMigrator.Postgres.PostgresExtensions.Identity``2(FluentMigrator.Builders.IColumnOptionSyntax{``0,``1},FluentMigrator.PostgresGenerationType)">
+            <summary>
+            Sets the column's identity generation attribute.  To change or remove an existing one, use Alter.Column instead of Alter.Table.AlterColumn
+            </summary>
+            <typeparam name="TNext"></typeparam>
+            <typeparam name="TNextFk"></typeparam>
+            <param name="expression"></param>
+            <param name="generation"></param>
+            <returns>The next step</returns>
+        </member>
+        <member name="M:FluentMigrator.Postgres.PostgresExtensions.DropIdentity(FluentMigrator.Builders.Alter.Column.IAlterColumnOptionSyntax,System.Boolean)">
+            <summary>
+            Drops an existing identity on the column
+            </summary>
+            <param name="expression"></param>
+            <param name="ifExists">If true and the column is not an identity column, no error is thrown.  In this case a notice is issued instead.</param>
+            <returns>The next step</returns>
+            <remarks>Deliberate choice to extend IAlterColumnOptionSyntax rather than IColumnOptionSyntax&lt;TNext, TNextFk&gt;
+            in order to prevent using these methods when adding a column to the table, since it makes no sense.  It does mean
+            the syntax migration.Alter.Table("tableName").AlterColumn("columnName") cannot be used since no distinction is made
+            between the the return types of AddColumn or AlterColumn on the IAlterTableColumnAsTypeSyntax interface which is inconvenient
+            but helps prevent misuse.
+            </remarks>
+        </member>
+        <member name="M:FluentMigrator.Postgres.PostgresExtensions.AddIdentity(FluentMigrator.Builders.Alter.Column.IAlterColumnOptionSyntax,FluentMigrator.PostgresGenerationType)">
+            <summary>
+            Adds a generated identity to the column
+            </summary>
+            <param name="expression"></param>
+            <param name="generation"></param>
+            <returns>The next step</returns>
+            <remarks>This is an equivalent to Alter.Table.AlterColumn.Identity(PostgresGenerationType)
+            Deliberate choice to extend IAlterColumnOptionSyntax rather than IColumnOptionSyntax&lt;TNext, TNextFk&gt;
+            in order to prevent using these methods when adding a column to the table, since it makes no sense.  It does mean
+            the syntax migration.Alter.Table("tableName").AlterColumn("columnName") cannot be used since no distinction is made
+            between the the return types of AddColumn or AlterColumn on the IAlterTableColumnAsTypeSyntax interface which is inconvenient
+            but helps prevent misuse.
+            </remarks>
+        </member>
+        <member name="M:FluentMigrator.Postgres.PostgresExtensions.SetIdentity(FluentMigrator.Builders.Alter.Column.IAlterColumnOptionSyntax,FluentMigrator.PostgresGenerationType)">
+            <summary>
+            Alters the strategy for an existing generated identity on the column
+            </summary>
+            <param name="expression"></param>
+            <param name="generation"></param>
+            <returns>The next step</returns>
+            <remarks>Deliberate choice to extend IAlterColumnOptionSyntax rather than IColumnOptionSyntax&lt;TNext, TNextFk&gt;
+            in order to prevent using these methods when adding a column to the table, since it makes no sense.  It does mean
+            the syntax migration.Alter.Table("tableName").AlterColumn("columnName") cannot be used since no distinction is made
+            between the the return types of AddColumn or AlterColumn on the IAlterTableColumnAsTypeSyntax interface which is inconvenient
+            but helps prevent misuse.
+            </remarks>
+        </member>
+    </members>
+</doc>
